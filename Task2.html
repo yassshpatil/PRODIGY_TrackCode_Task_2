@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stopwatch</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .stopwatch {
+    border: 2px solid #333;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #f4f4f4;
+  }
+
+  .time {
+    font-size: 40px;
+    margin-bottom: 20px;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .lap {
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="stopwatch">
+    <div class="time">00:00:00</div>
+    <div class="buttons">
+      <button id="startStopButton" onclick="startStop()">Start</button>
+      <button onclick="lap()">Lap</button>
+      <button onclick="reset()">Reset</button>
+    </div>
+    <div id="laps" class="lap"></div>
+  </div>
+</div>
+
+<script>
+  let timer;
+  let running = false;
+  let startTime;
+  let lapCounter = 1;
+
+  function startStop() {
+    if (running) {
+      clearInterval(timer);
+      document.getElementById('startStopButton').innerText = 'Start';
+    } else {
+      startTime = Date.now() - (lapCounter === 1 ? 0 : lapTimes[lapCounter - 2]);
+      timer = setInterval(updateTime, 10);
+      document.getElementById('startStopButton').innerText = 'Stop';
+    }
+    running = !running;
+  }
+
+  function updateTime() {
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - startTime;
+    const timeFormatted = formatTime(elapsedTime);
+    document.querySelector('.time').innerText = timeFormatted;
+  }
+
+  function formatTime(time) {
+    const hours = Math.floor(time / (1000 * 60 * 60));
+    const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((time % (1000 * 60)) / 1000);
+    const milliseconds = Math.floor((time % 1000) / 10);
+
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}:${pad(milliseconds)}`;
+  }
+
+  function pad(number) {
+    return number.toString().padStart(2, '0');
+  }
+
+  let lapTimes = [];
+
+  function lap() {
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - startTime;
+    lapTimes.push(elapsedTime);
+    const timeFormatted = formatTime(elapsedTime);
+    const lapDiv = document.createElement('div');
+    lapDiv.textContent = `Lap ${lapCounter}: ${timeFormatted}`;
+    document.getElementById('laps').appendChild(lapDiv);
+    lapCounter++;
+  }
+
+  function reset() {
+    clearInterval(timer);
+    document.querySelector('.time').innerText = '00:00:00';
+    document.getElementById('startStopButton').innerText = 'Start';
+    running = false;
+    lapCounter = 1;
+    lapTimes = [];
+    document.getElementById('laps').innerHTML = '';
+  }
+</script>
+
+</body>
+</html>
